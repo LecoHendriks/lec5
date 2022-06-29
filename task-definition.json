@@ -26,10 +26,10 @@
       "linuxParameters": null,
       "cpu": 0,
       "environment": [
-        // {
-        //   "name": "CONNECTIONSTRINGS__DEFAULTCONNECTION",
-        //   "value": "Server=cnsd-db-0784-4596-5761.ccjbang28yrd.us-east-1.rds.amazonaws.com;Port=5432;Database=albumdatabase;User Id=postgres;Password=lastpass;"
-        // }
+        {
+          "name": "CONNECTIONSTRINGS__DEFAULTCONNECTION",
+          "value": "Server=cnsd-db-0784-4596-5761.ccjbang28yrd.us-east-1.rds.amazonaws.com;Port=5432;Database=albumdatabase;User Id=postgres;Password=lastpass;"
+        }
       ],
       "resourceRequirements": null,
       "ulimits": null,
