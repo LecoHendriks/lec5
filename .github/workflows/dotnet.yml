@@ -1,0 +1,72 @@
+name: .NET
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v2
+      with:
+        dotnet-version: 5.0.x
+
+    - name: Logging
+      run: |
+        echo "Logging files in the repository"
+        find . -type f;
+
+    - name: Restore dependencies
+      run: dotnet restore ./
+
+    - name: Build
+      run: dotnet build ./ --no-restore
+
+    - name: Test
+      run: dotnet test ./ --no-build --verbosity normal
+
+    - name: Publish
+      run: dotnet publish ./ -c Release -r linux-x64
+
+    - name: Prepare AWS
+      uses: aws-actions/configure-aws-credentials@v1
+      with:
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        aws-session-token: ${{ secrets.AWS_SESSION_TOKEN }}
+        aws-region: us-east-1
+
+    - name: Login into AWS
+      id: login-ecr
+      uses: aws-actions/amazon-ecr-login@v1
+
+    - name: Build the Docker image
+      run: docker build . --file Dockerfile --tag cnsd/album:${{github.run_number}}
+    - name: Docker Tag
+      run: docker tag cnsd/album:${{github.run_number}} 604688323307.dkr.ecr.us-east-1.amazonaws.com/cnsd/album:${{github.run_number}}
+    - name: Docker Push
+      run: docker push 604688323307.dkr.ecr.us-east-1.amazonaws.com/cnsd/album:${{github.run_number}}
+
+    - name: Fill in the new image ID in the Amazon ECS task definition
+      id: task-def
+      uses: aws-actions/amazon-ecs-render-task-definition@v1
+      with:
+        task-definition: task-definition.json
+        container-name: AlbumContainer
+        image: 604688323307.dkr.ecr.us-east-1.amazonaws.com/cnsd/album:${{github.run_number}}
+
+    - name: Deploy Amazon ECS task definition
+      uses: aws-actions/amazon-ecs-deploy-task-definition@v1
+      with:
+        task-definition: ${{ steps.task-def.outputs.task-definition }}
+        service: AlbumServiceBlueGreen
+        cluster: AlbumCluster
+        wait-for-service-stability: true
