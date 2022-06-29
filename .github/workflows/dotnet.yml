@@ -51,9 +51,9 @@ jobs:
     - name: Build the Docker image
       run: docker build . --file Dockerfile --tag cnsd/album:${{github.run_number}}
     - name: Docker Tag
-      run: docker tag cnsd/album:${{github.run_number}} 604688323307.dkr.ecr.us-east-1.amazonaws.com/cnsd/album:${{github.run_number}}
+      run: docker tag cnsd/album:${{github.run_number}} 078445965761.dkr.ecr.us-east-1.amazonaws.com/cnsd/album:${{github.run_number}}
     - name: Docker Push
-      run: docker push 604688323307.dkr.ecr.us-east-1.amazonaws.com/cnsd/album:${{github.run_number}}
+      run: docker push 078445965761.dkr.ecr.us-east-1.amazonaws.com/cnsd/album:${{github.run_number}}
 
     - name: Fill in the new image ID in the Amazon ECS task definition
       id: task-def
@@ -61,7 +61,7 @@ jobs:
       with:
         task-definition: task-definition.json
         container-name: AlbumContainer
-        image: 604688323307.dkr.ecr.us-east-1.amazonaws.com/cnsd/album:${{github.run_number}}
+        image: 078445965761.dkr.ecr.us-east-1.amazonaws.com/cnsd/album:${{github.run_number}}
 
     - name: Deploy Amazon ECS task definition
       uses: aws-actions/amazon-ecs-deploy-task-definition@v1
